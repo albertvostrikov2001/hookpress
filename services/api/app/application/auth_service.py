@@ -94,6 +94,8 @@ class AuthService:
         if not settings.dev_login_enabled:
             raise AppError("dev_login_disabled", "Dev login is disabled", status_code=403)
 
+        email = self._normalize_email(email)
+
         if await self._is_locked_out(redis, email):
             await self._record_login_event(
                 db,

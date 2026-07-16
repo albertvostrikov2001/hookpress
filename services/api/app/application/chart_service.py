@@ -44,12 +44,15 @@ class ChartService:
         return f"chart:{source_slug}:{week.isoformat()}"
 
     async def invalidate_cache(self, source_slug: str, week: date | None = None) -> None:
-        if week is not None:
-            await redis_core.redis_client.delete(self._cache_key(source_slug, week))
+        try:
+            if week is not None:
+                await redis_core.redis_client.delete(self._cache_key(source_slug, week))
+                return
+            pattern = f"chart:{source_slug}:*"
+            async for key in redis_core.redis_client.scan_iter(match=pattern):
+                await redis_core.redis_client.delete(key)
+        except Exception:
             return
-        pattern = f"chart:{source_slug}:*"
-        async for key in redis_core.redis_client.scan_iter(match=pattern):
-            await redis_core.redis_client.delete(key)
 
     async def ensure_mock_source(self, db: AsyncSession) -> ChartSource:
         result = await db.execute(select(ChartSource).where(ChartSource.slug == "demo-top-40"))
@@ -181,7 +184,10 @@ class ChartService:
     ) -> tuple[ChartSource, list[ChartEntry], list[tuple[int | None, int | None]]]:
         week = week_date or date.today()
         cache_key = self._cache_key(source_slug, week)
-        cached = await redis_core.redis_client.get(cache_key)
+        try:
+            cached = await redis_core.redis_client.get(cache_key)
+        except Exception:
+            cached = None
         if cached:
             payload = json.loads(cached)
             source = ChartSource(
@@ -253,7 +259,10 @@ class ChartService:
                 for entry, (prev_pos, pos_change) in zip(entries, dynamics, strict=True)
             ],
         }
-        await redis_core.redis_client.setex(cache_key, CHART_CACHE_TTL_SECONDS, json.dumps(cache_payload))
+        try:
+            await redis_core.redis_client.setex(cache_key, CHART_CACHE_TTL_SECONDS, json.dumps(cache_payload))
+        except Exception:
+            pass
         return source, entries, dynamics
 
     async def list_sources(self, db: AsyncSession) -> list[ChartSource]:
