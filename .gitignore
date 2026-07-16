@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Go
+bin/
+*.exe
+
+# Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+infra/docker/certs/*.pem
+services/api/certs/
+certs/
+
+# Cursor / local IDE
+.cursor/
+assets/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+.next/
+out/
+coverage/
+htmlcov/
+
+# Docker volumes
+data/
+
+# Logs
+*.log
+
+# MinIO local
+.minio/

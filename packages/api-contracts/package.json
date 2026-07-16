@@ -1,0 +1,13 @@
+{
+  "name": "@hookpress/api-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "echo ok"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,72 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  --background: var(--hp-bg);
+  --foreground: var(--hp-fg);
+  --accent: var(--hp-accent);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  ::selection {
+    background: var(--hp-accent-muted);
+    color: var(--hp-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--hp-accent);
+    outline-offset: 2px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+@layer components {
+  .hp-gradient-text {
+    background: var(--hp-gradient-accent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hp-section {
+    @apply py-16 md:py-24;
+  }
+
+  .hp-grid-pattern {
+    background-image: linear-gradient(var(--hp-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--hp-border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 100%);
+  }
+
+  .hp-glass {
+    border: 1px solid var(--hp-border);
+    background-color: color-mix(in srgb, var(--hp-bg-elevated) 82%, transparent);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+}

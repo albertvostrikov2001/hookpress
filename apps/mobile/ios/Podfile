@@ -1,0 +1,2 @@
+# Minimum platform versions: iOS 16, Android 10 (API 29)
+platform :ios, '16.0'

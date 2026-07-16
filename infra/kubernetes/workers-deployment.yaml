@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hookpress-celery-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hookpress-celery-worker
+  template:
+    metadata:
+      labels:
+        app: hookpress-celery-worker
+    spec:
+      containers:
+        - name: worker
+          image: hookpress/celery:latest
+          command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=info"]
+          envFrom:
+            - configMapRef:
+                name: hookpress-api-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hookpress-promo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hookpress-promo
+  template:
+    metadata:
+      labels:
+        app: hookpress-promo
+    spec:
+      containers:
+        - name: promo
+          image: hookpress/promo:latest
+          ports:
+            - containerPort: 8081
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081

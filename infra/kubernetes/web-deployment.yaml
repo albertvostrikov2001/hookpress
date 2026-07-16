@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hookpress-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hookpress-web
+  template:
+    metadata:
+      labels:
+        app: hookpress-web
+    spec:
+      containers:
+        - name: web
+          image: hookpress/web:latest
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hookpress-web
+spec:
+  selector:
+    app: hookpress-web
+  ports:
+    - port: 3000
+      targetPort: 3000

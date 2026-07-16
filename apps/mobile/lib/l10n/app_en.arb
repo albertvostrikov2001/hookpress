@@ -1,0 +1,74 @@
+{
+
+  "@@locale": "en",
+
+  "appTitle": "hook.press",
+
+  "@appTitle": { "description": "Application title" },
+
+  "loginTitle": "Sign in",
+
+  "emailLabel": "Email",
+
+  "loginButton": "Dev login",
+
+  "feedTitle": "Feed",
+
+  "projectsTitle": "Projects",
+
+  "chatTitle": "Chat",
+
+  "playerTitle": "Player",
+
+  "profileTitle": "Profile",
+
+  "logoutButton": "Log out",
+
+  "feedEmpty": "No articles yet",
+
+  "feedLoadError": "Could not load feed",
+
+  "projectsEmpty": "No projects yet",
+
+  "chatStub": "Chat coming soon",
+
+  "chatEmpty": "No messages yet",
+
+  "chatOffline": "Offline — showing cached messages",
+
+  "chatInputHint": "Type a message",
+
+  "chatWsConnected": "WebSocket connected",
+
+  "chatWsReconnecting": "WebSocket reconnecting…",
+
+  "retryButton": "Retry",
+
+  "playerStub": "Audio player stub",
+
+  "playerTrackTitle": "Demo Track",
+
+  "playerArtist": "hook.press artist",
+
+  "playerSourceLabel": "Media asset {assetId}",
+
+  "@playerSourceLabel": {
+    "placeholders": {
+      "assetId": { "type": "String" }
+    }
+  },
+
+  "profileRoles": "Roles",
+
+  "profileNoRoles": "No roles",
+
+  "profileSession": "Session",
+
+  "profileSessionActive": "Refresh token stored",
+
+  "profileSessionMissing": "Access token only",
+
+  "loginError": "Login failed"
+
+}
+
