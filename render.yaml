@@ -23,6 +23,26 @@ services:
         fromDatabase:
           name: hookpress-db
           property: connectionString
+      - key: DB_HOST
+        fromDatabase:
+          name: hookpress-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: hookpress-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: hookpress-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: hookpress-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: hookpress-db
+          property: database
       - key: REDIS_URL
         sync: false
       - key: CORS_ORIGINS

@@ -1,5 +1,7 @@
 """Application settings."""
 
+from urllib.parse import quote_plus, urlparse, urlunparse
+
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -14,6 +16,11 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     database_url: str = "postgresql+asyncpg://hookpress:hookpress_dev@localhost:5432/hookpress"
+    db_host: str = ""
+    db_port: int = 5432
+    db_user: str = ""
+    db_password: str = ""
+    db_name: str = ""
     redis_url: str = "redis://localhost:6379/0"
 
     s3_endpoint: str = "http://localhost:9000"
@@ -86,6 +93,27 @@ class Settings(BaseSettings):
             self.database_url = self.database_url.replace(
                 "postgresql://", "postgresql+asyncpg://", 1
             )
+
+        parsed = urlparse(self.database_url)
+        if not parsed.hostname and self.db_host:
+            user = quote_plus(self.db_user)
+            password = quote_plus(self.db_password)
+            self.database_url = (
+                f"postgresql+asyncpg://{user}:{password}"
+                f"@{self.db_host}:{self.db_port}/{self.db_name}"
+            )
+            parsed = urlparse(self.database_url)
+
+        if parsed.query:
+            # asyncpg/SQLAlchemy handle SSL via connect_args, not ?sslmode=
+            self.database_url = urlunparse(parsed._replace(query=""))
+
+        if not urlparse(self.database_url).hostname:
+            raise ValueError(
+                "DATABASE_URL has no hostname. In Render: hookpress-db → Connect → "
+                "Internal → paste URL into hookpress-api → DATABASE_URL"
+            )
+
         if self.app_env == "production":
             self.cookie_secure = True
             self.dev_login_enabled = True
@@ -95,8 +123,9 @@ class Settings(BaseSettings):
 
     @property
     def database_connect_args(self) -> dict:
-        """Render Postgres requires SSL; asyncpg needs connect_args."""
-        if self.is_production or "render.com" in self.database_url:
+        """External Render Postgres (*.render.com) requires SSL; internal host does not."""
+        host = urlparse(self.database_url).hostname or self.db_host or ""
+        if host.endswith(".render.com"):
             return {"ssl": True}
         return {}
 
