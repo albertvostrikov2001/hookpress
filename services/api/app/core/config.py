@@ -78,14 +78,27 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def normalize_deploy_urls(self) -> "Settings":
-        if self.database_url.startswith("postgresql://"):
+        if self.database_url.startswith("postgres://"):
+            self.database_url = self.database_url.replace(
+                "postgres://", "postgresql+asyncpg://", 1
+            )
+        elif self.database_url.startswith("postgresql://"):
             self.database_url = self.database_url.replace(
                 "postgresql://", "postgresql+asyncpg://", 1
             )
         if self.app_env == "production":
             self.cookie_secure = True
             self.dev_login_enabled = True
+            if "localhost" in self.celery_broker_url and self.redis_url:
+                self.celery_broker_url = self.redis_url
         return self
+
+    @property
+    def database_connect_args(self) -> dict:
+        """Render Postgres requires SSL; asyncpg needs connect_args."""
+        if self.is_production or "render.com" in self.database_url:
+            return {"ssl": True}
+        return {}
 
     @property
     def cors_origin_list(self) -> list[str]:
