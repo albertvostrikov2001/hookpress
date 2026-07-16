@@ -177,8 +177,15 @@ export async function devLogin(email: string) {
     credentials: "include",
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message ?? res.statusText);
+    let message = res.statusText;
+    try {
+      const err = await res.json();
+      message = err?.error?.message ?? message;
+    } catch {
+      const text = await res.text().catch(() => "");
+      if (text) message = text.slice(0, 200);
+    }
+    throw new Error(message || `Login failed (${res.status})`);
   }
   const data = (await res.json()) as { tokens: AuthTokens; user: User };
   setToken(data.tokens.access_token);

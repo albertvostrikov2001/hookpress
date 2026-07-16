@@ -5,13 +5,11 @@ import { Button, Card, Input } from "@hookpress/ui";
 import { Footer } from "@/components/layout/Footer";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageShell } from "@/components/layout/PageShell";
-import { useRouter } from "@/i18n/navigation";
 import { devLogin } from "@/lib/api";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("login");
   const [email, setEmail] = useState("artist@example.com");
@@ -27,10 +25,10 @@ function LoginForm() {
       await devLogin(email);
       const redirect = searchParams.get("redirect");
       if (redirect && redirect.startsWith("/")) {
-        window.location.href = redirect;
-      } else {
-        router.push("/studio");
+        window.location.assign(redirect);
+        return;
       }
+      window.location.assign(`/${window.location.pathname.match(/^\/(ru|en)/)?.[1] ?? "ru"}/studio`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

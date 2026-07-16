@@ -34,19 +34,28 @@ class AuthService:
 
     async def _is_locked_out(self, redis: Redis, email: str) -> bool:
         _, locked_key = self._lockout_keys(email)
-        return bool(await redis.get(locked_key))
+        try:
+            return bool(await redis.get(locked_key))
+        except Exception:
+            return False
 
     async def _record_failed_login(self, redis: Redis, email: str) -> None:
         failures_key, locked_key = self._lockout_keys(email)
-        count = await redis.incr(failures_key)
-        if count == 1:
-            await redis.expire(failures_key, settings.login_lockout_ttl_seconds)
-        if count >= settings.login_lockout_max_attempts:
-            await redis.setex(locked_key, settings.login_lockout_ttl_seconds, "1")
+        try:
+            count = await redis.incr(failures_key)
+            if count == 1:
+                await redis.expire(failures_key, settings.login_lockout_ttl_seconds)
+            if count >= settings.login_lockout_max_attempts:
+                await redis.setex(locked_key, settings.login_lockout_ttl_seconds, "1")
+        except Exception:
+            return
 
     async def _clear_login_lockout(self, redis: Redis, email: str) -> None:
         failures_key, locked_key = self._lockout_keys(email)
-        await redis.delete(failures_key, locked_key)
+        try:
+            await redis.delete(failures_key, locked_key)
+        except Exception:
+            return
 
     async def _record_login_event(
         self,
