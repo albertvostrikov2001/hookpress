@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { getApiUrl } from "./api";
 
 export type ChartPayload = {
   source: { name: string; slug: string; is_mock: boolean; source_weights?: Record<string, number> };
@@ -13,7 +13,7 @@ export type ChartPayload = {
 };
 
 export async function fetchChartClient(slug = "demo-top-40"): Promise<ChartPayload> {
-  const res = await fetch(`${API_URL}/api/v1/charts/${slug}`, { cache: "no-store" });
+  const res = await fetch(`${getApiUrl()}/api/v1/charts/${slug}`, { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`API ${res.status}`);
   }

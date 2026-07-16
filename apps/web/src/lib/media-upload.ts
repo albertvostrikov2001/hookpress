@@ -1,6 +1,5 @@
-import { getToken } from "@/lib/api";
+import { getApiUrl, getToken } from "@/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const CHUNK_SIZE = 5 * 1024 * 1024;
 const MAX_RETRIES = 3;
 
@@ -15,7 +14,8 @@ export async function uploadMediaFile(
 
   const authHeaders = { Authorization: `Bearer ${token}` };
 
-  const initRes = await fetch(`${API_URL}/api/v1/media/uploads/initiate`, {
+  const apiUrl = getApiUrl();
+  const initRes = await fetch(`${apiUrl}/api/v1/media/uploads/initiate`, {
     method: "POST",
     headers: { ...authHeaders, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -43,7 +43,7 @@ export async function uploadMediaFile(
         const form = new FormData();
         form.append("part_number", String(partNumber));
         form.append("file", chunk, file.name);
-        const partRes = await fetch(`${API_URL}/api/v1/media/uploads/${uploadId}/parts`, {
+        const partRes = await fetch(`${apiUrl}/api/v1/media/uploads/${uploadId}/parts`, {
           method: "POST",
           headers: authHeaders,
           body: form,
@@ -67,7 +67,7 @@ export async function uploadMediaFile(
     onProgress?.(Math.round(((i + 1) / totalParts) * 100));
   }
 
-  const completeRes = await fetch(`${API_URL}/api/v1/media/uploads/${uploadId}/complete`, {
+  const completeRes = await fetch(`${apiUrl}/api/v1/media/uploads/${uploadId}/complete`, {
     method: "POST",
     headers: { ...authHeaders, "Content-Type": "application/json" },
     body: JSON.stringify({ parts }),

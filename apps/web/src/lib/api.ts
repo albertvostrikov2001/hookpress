@@ -1,16 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { resolveClientApiBase, resolveServerApiBase, resolveWsBase } from "./api-config";
 
 export function getApiUrl(): string {
-  return API_URL;
+  return resolveClientApiBase();
 }
 
 /** WebSocket base URL (wss in production when API is https). */
 export function getWsBaseUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_WS_URL;
-  if (explicit) return explicit.replace(/\/$/, "");
-  return API_URL.replace(/^https:\/\//, "wss://")
-    .replace(/^http:\/\//, "ws://")
-    .replace(/\/$/, "");
+  return resolveWsBase();
 }
 
 export type AuthTokens = { access_token: string; expires_in: number };
@@ -93,7 +89,7 @@ async function refreshAccessToken(): Promise<string | null> {
         if (csrf) headers["X-CSRF-Token"] = csrf;
       }
 
-      const res = await fetch(`${API_URL}/api/v1/auth/refresh`, {
+      const res = await fetch(`${getApiUrl()}/api/v1/auth/refresh`, {
         method: "POST",
         headers,
         credentials: "include",
@@ -120,7 +116,7 @@ async function refreshAccessToken(): Promise<string | null> {
 
 export async function logout() {
   try {
-    await fetch(`${API_URL}/api/v1/auth/logout`, {
+    await fetch(`${getApiUrl()}/api/v1/auth/logout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -147,7 +143,7 @@ export async function apiFetch<T>(
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${getApiUrl()}${path}`, {
     ...fetchOptions,
     headers,
     credentials: "include",
@@ -174,7 +170,7 @@ export async function apiFetch<T>(
 }
 
 export async function devLogin(email: string) {
-  const res = await fetch(`${API_URL}/api/v1/auth/dev-login`, {
+  const res = await fetch(`${getApiUrl()}/api/v1/auth/dev-login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),

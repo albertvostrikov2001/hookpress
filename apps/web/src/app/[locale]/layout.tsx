@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { SkipLink } from "@/components/SkipLink";
 import { routing, type Locale } from "@/i18n/routing";
+import { resolveServerApiBase } from "@/lib/api-config";
 import { AppProviders } from "@/providers/AppProviders";
 import "../../../../../packages/ui/src/tokens.css";
 import "../globals.css";
@@ -51,10 +52,16 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const apiBase = resolveServerApiBase();
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__HOOKPRESS_API_BASE__=${JSON.stringify(apiBase)};`,
+          }}
+        />
         <AppProviders locale={locale} messages={messages}>
           <SkipLink />
           <Nav />
