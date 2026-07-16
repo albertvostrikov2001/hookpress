@@ -85,33 +85,40 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def normalize_deploy_urls(self) -> "Settings":
-        if self.database_url.startswith("postgres://"):
-            self.database_url = self.database_url.replace(
-                "postgres://", "postgresql+asyncpg://", 1
-            )
-        elif self.database_url.startswith("postgresql://"):
-            self.database_url = self.database_url.replace(
-                "postgresql://", "postgresql+asyncpg://", 1
-            )
+        self.database_url = self.database_url.strip().strip('"').strip("'")
+        self.db_host = self.db_host.strip()
+        self.db_user = self.db_user.strip()
+        self.db_password = self.db_password.strip()
+        self.db_name = self.db_name.strip()
 
-        parsed = urlparse(self.database_url)
-        if not parsed.hostname and self.db_host:
+        # Prefer Render-injected DB_* vars — avoids broken manual DATABASE_URL pastes.
+        if self.db_host and self.db_user and self.db_password and self.db_name:
             user = quote_plus(self.db_user)
             password = quote_plus(self.db_password)
+            port = self.db_port or 5432
             self.database_url = (
                 f"postgresql+asyncpg://{user}:{password}"
-                f"@{self.db_host}:{self.db_port}/{self.db_name}"
+                f"@{self.db_host}:{port}/{self.db_name}"
             )
-            parsed = urlparse(self.database_url)
+        else:
+            if self.database_url.startswith("postgres://"):
+                self.database_url = self.database_url.replace(
+                    "postgres://", "postgresql+asyncpg://", 1
+                )
+            elif self.database_url.startswith("postgresql://"):
+                self.database_url = self.database_url.replace(
+                    "postgresql://", "postgresql+asyncpg://", 1
+                )
 
+        parsed = urlparse(self.database_url)
         if parsed.query:
-            # asyncpg/SQLAlchemy handle SSL via connect_args, not ?sslmode=
             self.database_url = urlunparse(parsed._replace(query=""))
 
-        if not urlparse(self.database_url).hostname:
+        host = urlparse(self.database_url).hostname
+        if not host:
             raise ValueError(
-                "DATABASE_URL has no hostname. In Render: hookpress-db → Connect → "
-                "Internal → paste URL into hookpress-api → DATABASE_URL"
+                "Database hostname missing. Set DB_HOST, DB_USER, DB_PASSWORD, DB_NAME "
+                "on hookpress-api (from hookpress-db → Connect → Internal)."
             )
 
         if self.app_env == "production":
@@ -122,9 +129,13 @@ class Settings(BaseSettings):
         return self
 
     @property
+    def database_host(self) -> str:
+        return urlparse(self.database_url).hostname or self.db_host or ""
+
+    @property
     def database_connect_args(self) -> dict:
         """External Render Postgres (*.render.com) requires SSL; internal host does not."""
-        host = urlparse(self.database_url).hostname or self.db_host or ""
+        host = self.database_host
         if host.endswith(".render.com"):
             return {"ssl": True}
         return {}

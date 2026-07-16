@@ -19,10 +19,6 @@ services:
     envVars:
       - key: APP_ENV
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: hookpress-db
-          property: connectionString
       - key: DB_HOST
         fromDatabase:
           name: hookpress-db
