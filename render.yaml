@@ -12,7 +12,7 @@ services:
     name: hookpress-api
     runtime: docker
     plan: free
-    region: frankfurt
+    region: oregon
     dockerfilePath: ./services/api/Dockerfile
     dockerContext: .
     healthCheckPath: /health
@@ -60,7 +60,7 @@ services:
     name: hookpress-web
     runtime: docker
     plan: free
-    region: frankfurt
+    region: oregon
     dockerfilePath: ./apps/web/Dockerfile
     dockerContext: .
     envVars:
