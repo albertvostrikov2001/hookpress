@@ -2,11 +2,12 @@
 
 from fastapi import APIRouter
 
-from app.api.v1 import admin, auth, billing, charts, chat, disputes, feed, market, media, notifications, office, promotions, studio, users, webhooks
+from app.api.v1 import admin, auth, billing, charts, chat, disputes, feed, market, media, notifications, office, promotions, setup, studio, users, webhooks
 
 router = APIRouter()
 
 router.include_router(auth.router)
+router.include_router(setup.router)
 router.include_router(users.router)
 router.include_router(admin.router)
 router.include_router(studio.router)

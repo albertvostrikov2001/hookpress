@@ -1,5 +1,6 @@
 """FastAPI application factory."""
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -22,10 +23,35 @@ from app.core.request_metrics import MetricsMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.core.telemetry import setup_otel, setup_sentry
 
+logger = logging.getLogger(__name__)
+
+
+async def _startup_demo_seed() -> None:
+    if not settings.dev_login_enabled:
+        return
+    try:
+        from sqlalchemy import func, select
+
+        from app.core.database import SessionLocal
+        from app.infrastructure.models.user import User
+        from scripts.seed import seed
+
+        async with SessionLocal() as session:
+            count = await session.scalar(select(func.count()).select_from(User))
+        if count and count > 0:
+            logger.info("Demo seed skipped — %s user(s) already in database", count)
+            return
+
+        await seed()
+        logger.info("Demo seed completed on startup")
+    except Exception:
+        logger.exception("Demo seed failed on startup")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging(settings.log_level)
+    await _startup_demo_seed()
     yield
     await engine.dispose()
 

@@ -7,5 +7,5 @@ if [ ! -f certs/dev/private.pem ]; then
 fi
 python -c "from app.core.config import settings; print(f'DB target: {settings.database_host}:{settings.db_port}')"
 alembic upgrade head
-python scripts/seed.py || { echo "ERROR: seed.py failed"; exit 1; }
+python scripts/seed.py || echo "WARNING: entrypoint seed failed — uvicorn startup will retry"
 exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"

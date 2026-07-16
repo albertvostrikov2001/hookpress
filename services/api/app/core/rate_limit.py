@@ -13,7 +13,7 @@ from app.core.redis import redis_client
 
 logger = logging.getLogger(__name__)
 
-EXEMPT_PATHS = {"/health", "/ready", "/metrics"}
+EXEMPT_PATHS = {"/health", "/ready", "/metrics", "/api/v1/setup/seed", "/api/v1/setup/status"}
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
